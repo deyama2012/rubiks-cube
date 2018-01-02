@@ -5,9 +5,7 @@ using UnityEngine;
 public class TransformationMatrix : MonoBehaviour
 {
 	public Transform[] targets;
-
-	bool coroutineRunning;
-
+	public bool coroutineRunning;
 	public float duration;
 
 
@@ -15,54 +13,51 @@ public class TransformationMatrix : MonoBehaviour
 	public void Rotate()
 	{
 		if (!coroutineRunning)
-			StartCoroutine(RotateCoroutine(duration));
+			StartCoroutine(RotateCoroutine());
 	}
 
 
-	IEnumerator RotateCoroutine(float duration)
+
+
+	IEnumerator RotateCoroutine()
 	{
 		coroutineRunning = true;
 
-		int count = targets.Length; // always 9 for Rubic's Cube layer
+		GameObject face = new GameObject("Temporary_container");
+		face.transform.position = Vector3.up;
 
+		Transform root = targets[0].parent;
+
+		// Parent
+		foreach (var c in targets)
+			c.SetParent(face.transform);
+
+		// Quaternion from = face.transform.rotation;
+		// Quaternion to = face.transform.rotation * Quaternion.Euler(Vector3.up * 90);
+		// float t = 0;
+		// while (t < duration)
+		// {
+		// 	face.transform.rotation = Quaternion.Slerp(from, to, t / duration);
+		// 	t += Time.deltaTime;
+		// 	yield return null;
+		// }
+		// face.transform.rotation = to;
+
+		Quaternion rotation = face.transform.rotation * Quaternion.Euler(Vector3.up * 90);
 		float t = 0;
-
-		Quaternion rotation = Quaternion.Euler(0, 90, 0);
-		Matrix4x4 m = Matrix4x4.Rotate(rotation);
-
-		Vector3[] startPos = new Vector3[count];
-		Vector3[] endPos = new Vector3[count];
-		Vector3[] lookStartPos = new Vector3[count];
-		Vector3[] looktEndPos = new Vector3[count];
-
-		for (int i = 0; i < count; i++)
-		{
-			startPos[i] = targets[i].position;
-			endPos[i] = m.MultiplyPoint(startPos[i]);
-			lookStartPos[i] = targets[i].position + targets[i].forward;
-			looktEndPos[i] = m.MultiplyPoint(lookStartPos[i]);
-		}
-
 		while (t < duration)
 		{
-			for (int i = 0; i < count; i++)
-			{
-				targets[i].position = Vector3.Slerp(startPos[i], endPos[i], t / duration);
-
-				Vector3 lookAt = Vector3.Slerp(lookStartPos[i], looktEndPos[i], t / duration);
-				targets[i].LookAt(lookAt);
-			}
-
+			face.transform.Rotate(Vector3.up, 90 / duration * Time.deltaTime);
 			t += Time.deltaTime;
-
 			yield return null;
 		}
+		face.transform.rotation = rotation;
 
-		for (int i = 0; i < count; i++)
-		{
-			targets[i].position = endPos[i];
-			targets[i].LookAt(looktEndPos[i]);
-		}
+		// Unparent
+		foreach (var c in targets)
+			c.SetParent(root);
+
+		Destroy(face);
 
 		coroutineRunning = false;
 	}

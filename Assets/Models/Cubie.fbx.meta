@@ -1,46 +1,54 @@
 fileFormatVersion: 2
-guid: 95ac2fd4609247644a6697448be43057
-timeCreated: 1514449310
+guid: 6b871add4baad3b45a98dd8bf71aef8c
+timeCreated: 1514895790
 licenseType: Free
 ModelImporter:
-  serializedVersion: 19
+  serializedVersion: 22
   fileIDToRecycleName:
-    100000: Cube.000
-    100002: Cube.001
-    100004: Cube.002
-    100006: Cube.003
-    100008: Cube.004
-    100010: Cube.005
-    100012: //RootNode
-    400000: Cube.000
-    400002: Cube.001
-    400004: Cube.002
-    400006: Cube.003
-    400008: Cube.004
-    400010: Cube.005
-    400012: //RootNode
-    2300000: Cube.000
-    2300002: Cube.001
-    2300004: Cube.002
-    2300006: Cube.003
-    2300008: Cube.004
-    2300010: Cube.005
-    3300000: Cube.000
-    3300002: Cube.001
-    3300004: Cube.002
-    3300006: Cube.003
-    3300008: Cube.004
-    3300010: Cube.005
-    4300000: Cube.005
-    4300002: Cube.004
-    4300004: Cube.002
-    4300006: Cube.001
-    4300008: Cube.000
-    4300010: Cube.003
+    100000: Base
+    100002: //RootNode
+    100004: Facelet.001
+    100006: Facelet.002
+    100008: Facelet.003
+    100010: Facelet.004
+    100012: Facelet.005
+    100014: Facelet.006
+    400000: Base
+    400002: //RootNode
+    400004: Facelet.001
+    400006: Facelet.002
+    400008: Facelet.003
+    400010: Facelet.004
+    400012: Facelet.005
+    400014: Facelet.006
+    2100000: Material.001
+    2300000: Base
+    2300002: Facelet.001
+    2300004: Facelet.002
+    2300006: Facelet.003
+    2300008: Facelet.004
+    2300010: Facelet.005
+    2300012: Facelet.006
+    3300000: Base
+    3300002: Facelet.001
+    3300004: Facelet.002
+    3300006: Facelet.003
+    3300008: Facelet.004
+    3300010: Facelet.005
+    3300012: Facelet.006
+    4300000: Facelet.004
+    4300002: Facelet.006
+    4300004: Facelet.001
+    4300006: Facelet.002
+    4300008: Facelet.003
+    4300010: Facelet.005
+    4300012: Base
+  externalObjects: {}
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
+    materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -53,26 +61,33 @@ ModelImporter:
     animationImportWarnings: 
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
     animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
+    extraUserProperties: []
     clipAnimations: []
-    isReadable: 0
+    isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 50
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
+    importVisibility: 1
     importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
     optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
@@ -82,6 +97,7 @@ ModelImporter:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
+    normalCalculationMode: 4
   importAnimation: 0
   copyAvatar: 0
   humanDescription:
