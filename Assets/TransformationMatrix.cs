@@ -4,68 +4,66 @@ using UnityEngine;
 
 public class TransformationMatrix : MonoBehaviour
 {
-	public Transform target;
+	public Transform[] targets;
 
-	[SerializeField]
 	bool coroutineRunning;
+
+	public float duration;
+
 
 	[ContextMenu("Rotate")]
 	public void Rotate()
 	{
 		if (!coroutineRunning)
-			StartCoroutine(RotateCoroutine());
+			StartCoroutine(RotateCoroutine(duration));
 	}
 
 
-	IEnumerator RotateCoroutine()
+	IEnumerator RotateCoroutine(float duration)
 	{
 		coroutineRunning = true;
 
-		float duration = 3;
+		int count = targets.Length; // always 9 for Rubic's Cube layer
+
 		float t = 0;
-		Vector3 startPos = target.position;
 
 		Quaternion rotation = Quaternion.Euler(0, 90, 0);
 		Matrix4x4 m = Matrix4x4.Rotate(rotation);
-		Vector3 endPos = m.MultiplyPoint(startPos);
 
-		Vector3 lookStartPos = new Vector3(0, 0, startPos.z);
-		Vector3 looktEndPos = m.MultiplyPoint(lookStartPos);
+		Vector3[] startPos = new Vector3[count];
+		Vector3[] endPos = new Vector3[count];
+		Vector3[] lookStartPos = new Vector3[count];
+		Vector3[] looktEndPos = new Vector3[count];
+
+		for (int i = 0; i < count; i++)
+		{
+			startPos[i] = targets[i].position;
+			endPos[i] = m.MultiplyPoint(startPos[i]);
+			lookStartPos[i] = targets[i].position + targets[i].forward;
+			looktEndPos[i] = m.MultiplyPoint(lookStartPos[i]);
+		}
 
 		while (t < duration)
 		{
-			target.position = Vector3.Slerp(startPos, endPos, t / duration);
+			for (int i = 0; i < count; i++)
+			{
+				targets[i].position = Vector3.Slerp(startPos[i], endPos[i], t / duration);
 
-			Vector3 lookAt = Vector3.Slerp(lookStartPos, looktEndPos, t / duration);
-			target.LookAt(lookAt);
+				Vector3 lookAt = Vector3.Slerp(lookStartPos[i], looktEndPos[i], t / duration);
+				targets[i].LookAt(lookAt);
+			}
 
 			t += Time.deltaTime;
 
 			yield return null;
 		}
 
-		target.position = endPos;
+		for (int i = 0; i < count; i++)
+		{
+			targets[i].position = endPos[i];
+			targets[i].LookAt(looktEndPos[i]);
+		}
 
 		coroutineRunning = false;
 	}
-
-
-	// IEnumerator RotateCoroutine()
-	// {
-	// 	float duration = 2;
-	// 	float t = 0;
-	// 	Vector3 startPos = target.position;
-
-	// 	while (t < duration)
-	// 	{
-	// 		Quaternion rotation = Quaternion.Euler(0, Mathf.Lerp(0, 90, t / duration), 0);
-	// 		Matrix4x4 m = Matrix4x4.Rotate(rotation);
-
-	// 		target.position = m.MultiplyPoint3x4(startPos);
-
-	// 		t += Time.deltaTime;
-
-	// 		yield return null;
-	// 	}
-	// }
 }
