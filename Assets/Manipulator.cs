@@ -10,8 +10,7 @@ public class Manipulator : MonoBehaviour
 	public Handle[] handles;
 	public Transform[] selected;
 	public int angle = 90;
-	public float duration = 1;
-	[SerializeField]
+	public float duration = 0.5f;
 	private bool coroutineRunning;
 
 

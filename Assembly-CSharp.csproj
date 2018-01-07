@@ -51,6 +51,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Cube.cs" />
+     <Compile Include="Assets\Cubie.cs" />
      <Compile Include="Assets\Handle.cs" />
      <Compile Include="Assets\Manipulator.cs" />
      <Compile Include="Assets\OrbitCamera.cs" />
