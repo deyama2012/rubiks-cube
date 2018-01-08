@@ -57,9 +57,7 @@ public class Cube : MonoBehaviour
 		Vector3[] normals = { transform.forward, -transform.forward, transform.right, -transform.right, transform.up, -transform.up };
 
 		float maxDotProductZ = 0;
-
 		Vector3 z = Vector3.zero;
-
 		foreach (var normal in normals)
 		{
 			float dotProductZ = Vector3.Dot(-Camera.main.transform.forward, normal);
@@ -71,7 +69,27 @@ public class Cube : MonoBehaviour
 			}
 		}
 
+		float maxDotProductY = 0;
+		Vector3 y = Vector3.zero;
+		foreach (var normal in normals)
+		{
+			if (normal == z || normal == -z)
+				continue;
+
+			float dotProductY = Vector3.Dot(Camera.main.transform.up, normal);
+
+			if (dotProductY > maxDotProductY)
+			{
+				maxDotProductY = dotProductY;
+				y = normal;
+			}
+		}
+
+		Vector3 x = Vector3.Cross(z, y);
+
 		Debug.DrawRay(transform.position, z * 3, Color.blue);
+		Debug.DrawRay(transform.position, x * 3, Color.red);
+		Debug.DrawRay(transform.position, y * 3, Color.green);
 	}
 
 	[ContextMenu("Select")]
