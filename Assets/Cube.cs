@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Cube : MonoBehaviour
 {
 	Transform[][][] cubeMatrix = new Transform[3][][];
 	public GameObject cubiePrefab;
 	public Transform[] selected;
-	public int angle = 90;
 	public float duration = 0.5f;
 	private bool coroutineRunning;
+	public bool counterClockwise;
+
+	public KeyCode front, back, left, right, up, down;
 
 	/// ///////////////////////////////////////////////
 
@@ -47,36 +50,83 @@ public class Cube : MonoBehaviour
 	}
 
 
-	public void Left()
+	void Update()
 	{
-		if (coroutineRunning)
-			return;
+		//PlayerInput();
 
-		selected = new Transform[9];
+		Vector3[] normals = { transform.forward, -transform.forward, transform.right, -transform.right, transform.up, -transform.up };
 
+		float maxDotProductZ = 0;
+
+		Vector3 z = Vector3.zero;
+
+		foreach (var normal in normals)
+		{
+			float dotProductZ = Vector3.Dot(-Camera.main.transform.forward, normal);
+
+			if (dotProductZ > maxDotProductZ)
+			{
+				maxDotProductZ = dotProductZ;
+				z = normal;
+			}
+		}
+
+		Debug.DrawRay(transform.position, z * 3, Color.blue);
+	}
+
+	[ContextMenu("Select")]
+	public void Select()
+	{
+		GameObject[] selection = new GameObject[9];
 		int k = 0;
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++, k++)
-				selected[k] = cubeMatrix[0][i][j];
+				selection[k] = cubeMatrix[0][i][j].gameObject;
 
-		StartCoroutine(RotateAround(Vector3.left, Vector3.left, angle));
+		UnityEditor.Selection.objects = selection;
 	}
 
-	[ContextMenu("Print left face")]
-	public void Print()
-	{
-		string s = string.Empty;
 
-		for (int i = 0; i < 3; i++)
+
+	void PlayerInput()
+	{
+		counterClockwise = Input.GetKey(KeyCode.LeftControl);
+
+		if (Input.GetKeyDown(front))
 		{
-			for (int j = 0; j < 3; j++)
-			{
-				s += cubeMatrix[0][i][j].name + "\t\t\t";
-			}
-			s += "\r\n";
+			Front();
+			return;
 		}
 
-		print(s);
+		if (Input.GetKeyDown(back))
+		{
+			Back();
+			return;
+		}
+
+		if (Input.GetKeyDown(left))
+		{
+			Left();
+			return;
+		}
+
+		if (Input.GetKeyDown(right))
+		{
+			Right();
+			return;
+		}
+
+		if (Input.GetKeyDown(up))
+		{
+			Up();
+			return;
+		}
+
+		if (Input.GetKeyDown(down))
+		{
+			Down();
+			return;
+		}
 	}
 
 
@@ -87,10 +137,6 @@ public class Cube : MonoBehaviour
 
 		Vector3[] positions = new Vector3[selected.Length];
 		Quaternion[] rotations = new Quaternion[selected.Length];
-
-		//Vector3[] oldPositions = new Vector3[selected.Length];
-		// for (int i = 0; i < positions.Length; i++)
-		// 	oldPositions[i] = selected[i].position;
 
 		for (int i = 0; i < rotations.Length; i++)
 			rotations[i] = selected[i].rotation * Quaternion.Euler(axis * angle);
@@ -131,13 +177,108 @@ public class Cube : MonoBehaviour
 			cubeMatrix[x][y][z] = selected[i];
 		}
 
-		// for (int i = 0; i < selected.Length; i++)
-		// {
-		// 	selected[i].rotation = Quaternion.identity;
-		// 	selected[i].position = oldPositions[i];
-		// 	selected[i].GetComponent<Cubie>().Rotate(axis);
-		// }
-
 		coroutineRunning = false;
+	}
+
+
+	public void Left()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = new Transform[9];
+		int k = 0;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++, k++)
+				selected[k] = cubeMatrix[0][i][j];
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateAround(Vector3.left, Vector3.left, angle));
+	}
+
+
+	public void Right()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = new Transform[9];
+		int k = 0;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++, k++)
+				selected[k] = cubeMatrix[2][i][j];
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateAround(Vector3.right, Vector3.right, angle));
+	}
+
+
+	public void Front()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = new Transform[9];
+		int k = 0;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++, k++)
+				selected[k] = cubeMatrix[i][j][0];
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateAround(Vector3.back, Vector3.back, angle));
+	}
+
+
+	public void Back()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = new Transform[9];
+		int k = 0;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++, k++)
+				selected[k] = cubeMatrix[i][j][2];
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateAround(Vector3.forward, Vector3.forward, angle));
+	}
+
+
+	public void Up()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = new Transform[9];
+		int k = 0;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++, k++)
+				selected[k] = cubeMatrix[i][2][j];
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateAround(Vector3.up, Vector3.up, angle));
+	}
+
+
+	public void Down()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = new Transform[9];
+		int k = 0;
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 3; j++, k++)
+				selected[k] = cubeMatrix[i][0][j];
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateAround(Vector3.down, Vector3.down, angle));
+	}
+
+
+	public void OnToggleValueChanged(Toggle toggle)
+	{
+		counterClockwise = toggle.isOn;
 	}
 }

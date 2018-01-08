@@ -5,23 +5,20 @@ using UnityEngine;
 public class OrbitCamera : MonoBehaviour
 {
     [Header("Zoom")]
-    public float zoom = 4;
-    public float minZoom = 2;
-    public float maxZoom = 5;
-    public float zoomSpeed = 5;
+    public float zoom = 45;
+    public float minZoom = 30;
+    public float maxZoom = 60;
+    public float zoomSpeed = 5000;
 
     [Header("Rotation")]
-    public float xSpeed = 120;
-    public float ySpeed = 120;
-    public float yMinLimit = 20;
-    public float yMaxLimit = 70;
+    public float xSpeed = 500;
+    public float ySpeed = 500;
 
     float x, y;
+    Camera mainCam;
 
-    Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-    Vector3 lastPosition;
-
-    Camera mainCam, childCam;
+    Vector3 defaultPos;
+    Quaternion defaultRot;
 
     /// /////////////////////////////////////////////////////////
 
@@ -32,6 +29,9 @@ public class OrbitCamera : MonoBehaviour
         y = angles.x;
 
         mainCam = GetComponent<Camera>();
+
+        defaultPos = mainCam.transform.position;
+        defaultRot = mainCam.transform.rotation;
     }
 
 
@@ -41,74 +41,48 @@ public class OrbitCamera : MonoBehaviour
         if (Input.GetMouseButton(1))
             Rotation();
 
-        // Panning (movement)
-        if (Input.GetMouseButtonDown(2))
-            lastPosition = GetMouseGroundAlignedWorldPos();
-
-        else if (Input.GetMouseButton(2))
-            Panning();
-
         // Zoom
         else if (!Mathf.Approximately(Input.GetAxis("Mouse ScrollWheel"), 0f))
             Zooming();
 
-        if (childCam != null)
-            childCam.orthographicSize = mainCam.orthographicSize;
+        else if (Input.GetMouseButtonDown(2))
+            ResetCamera();
     }
 
 
     void Rotation()
     {
-        Ray ray = new Ray(mainCam.transform.position, mainCam.transform.forward);
-        float enter;
+        x += Input.GetAxis("Mouse X") * xSpeed * Time.deltaTime;
+        y -= Input.GetAxis("Mouse Y") * ySpeed * Time.deltaTime;
 
-        if (groundPlane.Raycast(ray, out enter))
-        {
-            float distance = 20;
+        Quaternion rotation = Quaternion.Euler(y, x, 0);
 
-            x += Input.GetAxis("Mouse X") * xSpeed * 0.02f;
-            y -= Input.GetAxis("Mouse Y") * ySpeed * 0.02f;
+        Vector3 negativeDistance = new Vector3(0, 0, -10);
+        Vector3 position = rotation * negativeDistance;
 
-            y = ClampAngle(y, yMinLimit, yMaxLimit);
-
-            Quaternion rotation = Quaternion.Euler(y, x, 0);
-
-            Vector3 negativeDistance = new Vector3(0, 0, -distance);
-            Vector3 position = rotation * negativeDistance + ray.GetPoint(enter);
-
-            transform.rotation = rotation;
-            transform.position = position;
-        }
-    }
-
-
-    void Panning()
-    {
-        Vector3 delta = GetMouseGroundAlignedWorldPos() - lastPosition;
-
-        Vector3 position = new Vector3(transform.position.x - delta.x, transform.position.y, transform.position.z - delta.z);
+        transform.rotation = rotation;
         transform.position = position;
-
-        lastPosition = GetMouseGroundAlignedWorldPos();
     }
 
 
     void Zooming()
     {
-        zoom = Mathf.Clamp(zoom - Input.GetAxis("Mouse ScrollWheel") * zoomSpeed, minZoom, maxZoom);
-        mainCam.orthographicSize = zoom;
+        zoom = Mathf.Clamp(zoom - Input.GetAxis("Mouse ScrollWheel") * zoomSpeed * Time.deltaTime, minZoom, maxZoom);
+        mainCam.fieldOfView = zoom;
     }
 
 
-    Vector3 GetMouseGroundAlignedWorldPos()
+    void ResetCamera()
     {
-        Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
-        float enter;
+        transform.position = defaultPos;
+        transform.rotation = defaultRot;
 
-        if (groundPlane.Raycast(ray, out enter))
-            return ray.GetPoint(enter);
+        Vector3 angles = transform.eulerAngles;
+        x = angles.y;
+        y = angles.x;
 
-        return Vector3.zero;
+        zoom = (minZoom + maxZoom) / 2;
+        mainCam.fieldOfView = zoom;
     }
 
 
