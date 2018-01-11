@@ -6,18 +6,24 @@ using UnityEngine.UI;
 
 public class Cube : MonoBehaviour
 {
-	Transform[][][] cubeMatrix = new Transform[3][][];
 	public GameObject cubiePrefab;
-	public Transform[] selected;
+
 	public float duration = 0.5f;
-	private bool coroutineRunning;
 	public bool counterClockwise;
 
-	public KeyCode front, back, left, right, up, down;
+	private Transform[][][] cubeMatrix = new Transform[3][][];
+	private Transform[] selected;
+	private bool coroutineRunning;
+
+	[Header("- Controls -")]
+	public KeyCode front;
+	public KeyCode back, left, right, up, down;
+
+	public bool relativeToCamera;
 
 	/// ///////////////////////////////////////////////
 
-	void Start()
+	void Awake()
 	{
 		for (int x = 0; x < 3; x++)
 		{
@@ -43,10 +49,67 @@ public class Cube : MonoBehaviour
 				cubeMatrix[i][j][0].GetComponent<Cubie>().SetColor(0, Color.white);
 				cubeMatrix[i][j][2].GetComponent<Cubie>().SetColor(1, Color.yellow);
 				cubeMatrix[0][i][j].GetComponent<Cubie>().SetColor(2, Color.red);
-				cubeMatrix[2][i][j].GetComponent<Cubie>().SetColor(3, new Color(1, 0.5f, 0));
+				cubeMatrix[2][i][j].GetComponent<Cubie>().SetColor(3, new Color(1, 0.33f, 0));
 				cubeMatrix[i][2][j].GetComponent<Cubie>().SetColor(4, Color.green);
 				cubeMatrix[i][0][j].GetComponent<Cubie>().SetColor(5, Color.blue);
 			}
+	}
+
+
+	Transform[] GetFaceCubies(Vector3 faceNormal)
+	{
+		Transform[] cubies = new Transform[9];
+
+		int x = (int) faceNormal.x;
+		int y = (int) faceNormal.y;
+		int z = (int) faceNormal.z;
+
+		int k = 0;
+
+		if (x != 0)
+		{
+			x += 1;
+
+			for (int i = y; i < 3; i++)
+				for (int j = z; j < 3; j++, k++)
+					cubies[k] = cubeMatrix[x][i][j];
+		}
+
+		else if (y != 0)
+		{
+			y += 1;
+
+			for (int i = x; i < 3; i++)
+				for (int j = z; j < 3; j++, k++)
+					cubies[k] = cubeMatrix[i][y][j];
+		}
+
+		else if (z != 0)
+		{
+			z += 1;
+
+			for (int i = x; i < 3; i++)
+				for (int j = y; j < 3; j++, k++)
+					cubies[k] = cubeMatrix[i][j][z];
+		}
+
+		return cubies;
+	}
+
+
+	Transform[] GetAllCubies()
+	{
+		Transform[] cubies = new Transform[27];
+
+		int m = 0;
+		for (int x = 0; x < 3; x++)
+			for (int y = 0; y < 3; y++)
+				for (int z = 0; z < 3; z++, m++)
+				{
+					cubies[m] = cubeMatrix[x][y][z];
+				}
+
+		return cubies;
 	}
 
 
@@ -54,6 +117,20 @@ public class Cube : MonoBehaviour
 	{
 		//PlayerInput();
 
+		Vector3[] xyz = GetCameraRelativeForwardRightUpVectors();
+
+		Vector3 x = xyz[0];
+		Vector3 y = xyz[1];
+		Vector3 z = xyz[2];
+
+		Debug.DrawRay(transform.position, z * 3, Color.blue);
+		Debug.DrawRay(transform.position, x * 3, Color.red);
+		Debug.DrawRay(transform.position, y * 3, Color.green);
+	}
+
+
+	Vector3[] GetCameraRelativeForwardRightUpVectors()
+	{
 		Vector3[] normals = { transform.forward, -transform.forward, transform.right, -transform.right, transform.up, -transform.up };
 
 		float maxDotProductZ = 0;
@@ -87,23 +164,8 @@ public class Cube : MonoBehaviour
 
 		Vector3 x = Vector3.Cross(z, y);
 
-		Debug.DrawRay(transform.position, z * 3, Color.blue);
-		Debug.DrawRay(transform.position, x * 3, Color.red);
-		Debug.DrawRay(transform.position, y * 3, Color.green);
+		return new [] { x, y, z };
 	}
-
-	[ContextMenu("Select")]
-	public void Select()
-	{
-		GameObject[] selection = new GameObject[9];
-		int k = 0;
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++, k++)
-				selection[k] = cubeMatrix[0][i][j].gameObject;
-
-		UnityEditor.Selection.objects = selection;
-	}
-
 
 
 	void PlayerInput()
@@ -112,46 +174,81 @@ public class Cube : MonoBehaviour
 
 		if (Input.GetKeyDown(front))
 		{
-			Front();
+			RotateFront();
 			return;
 		}
 
 		if (Input.GetKeyDown(back))
 		{
-			Back();
+			RotateBack();
 			return;
 		}
 
 		if (Input.GetKeyDown(left))
 		{
-			Left();
+			RotateLeft();
 			return;
 		}
 
 		if (Input.GetKeyDown(right))
 		{
-			Right();
+			RotateRight();
 			return;
 		}
 
 		if (Input.GetKeyDown(up))
 		{
-			Up();
+			RotateUp();
 			return;
 		}
 
 		if (Input.GetKeyDown(down))
 		{
-			Down();
+			RotateDown();
 			return;
 		}
 	}
 
 
-	IEnumerator RotateAround(Vector3 point, Vector3 axis, float angle)
+	public void RotateCubeX()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = GetAllCubies();
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateCoroutine(Vector3.zero, Vector3.right, angle));
+	}
+
+
+	public void RotateCubeY()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = GetAllCubies();
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateCoroutine(Vector3.zero, Vector3.up, angle));
+	}
+
+
+	public void RotateCubeZ()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = GetAllCubies();
+
+		int angle = counterClockwise ? -90 : 90;
+		StartCoroutine(RotateCoroutine(Vector3.zero, Vector3.forward, angle));
+	}
+
+
+	IEnumerator RotateCoroutine(Vector3 point, Vector3 axis, float angle)
 	{
 		coroutineRunning = true;
-		float t = 0;
 
 		Vector3[] positions = new Vector3[selected.Length];
 		Quaternion[] rotations = new Quaternion[selected.Length];
@@ -162,6 +259,8 @@ public class Cube : MonoBehaviour
 		for (int i = 0; i < positions.Length; i++)
 			positions[i] = Quaternion.Euler(axis * angle) * selected[i].position;
 
+		float t = 0;
+
 		while (t < duration)
 		{
 			foreach (var cubie in selected)
@@ -171,21 +270,15 @@ public class Cube : MonoBehaviour
 			yield return null;
 		}
 
-		// Snap rotation
+		// Snap cubies' rotations
 		for (int i = 0; i < rotations.Length; i++)
-		{
-			var vec = selected[i].eulerAngles;
-			vec.x = Mathf.Round(vec.x / 90) * 90;
-			vec.y = Mathf.Round(vec.y / 90) * 90;
-			vec.z = Mathf.Round(vec.z / 90) * 90;
-			selected[i].eulerAngles = vec;
-		}
+			selected[i].eulerAngles = RoundToInt(selected[i].eulerAngles);
 
-		// Snap position
+		// Snap cubies' positions
 		for (int i = 0; i < positions.Length; i++)
 			selected[i].position = positions[i];
 
-		// Update cube matrix
+		// Update cube matrix based on cubies' current world positions
 		for (int i = 0; i < positions.Length; i++)
 		{
 			int x = Mathf.RoundToInt(positions[i].x + 1);
@@ -199,104 +292,121 @@ public class Cube : MonoBehaviour
 	}
 
 
-	public void Left()
+	public void RotateLeft()
 	{
 		if (coroutineRunning)
 			return;
 
-		selected = new Transform[9];
-		int k = 0;
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++, k++)
-				selected[k] = cubeMatrix[0][i][j];
+		Vector3 axis = Vector3.left;
+
+		if (relativeToCamera)
+			axis = -GetCameraRelativeForwardRightUpVectors()[0];
+
+		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateAround(Vector3.left, Vector3.left, angle));
+		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
 
-	public void Right()
+	public void RotateRight()
 	{
 		if (coroutineRunning)
 			return;
 
-		selected = new Transform[9];
-		int k = 0;
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++, k++)
-				selected[k] = cubeMatrix[2][i][j];
+		Vector3 axis = Vector3.right;
+
+		if (relativeToCamera)
+			axis = GetCameraRelativeForwardRightUpVectors()[0];
+
+		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateAround(Vector3.right, Vector3.right, angle));
+		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
 
-	public void Front()
+	public void RotateFront()
 	{
 		if (coroutineRunning)
 			return;
 
-		selected = new Transform[9];
-		int k = 0;
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++, k++)
-				selected[k] = cubeMatrix[i][j][0];
+		Vector3 axis = Vector3.back;
+
+		if (relativeToCamera)
+			axis = GetCameraRelativeForwardRightUpVectors()[2];
+
+		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateAround(Vector3.back, Vector3.back, angle));
+		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
 
-	public void Back()
+	public void RotateBack()
 	{
 		if (coroutineRunning)
 			return;
 
-		selected = new Transform[9];
-		int k = 0;
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++, k++)
-				selected[k] = cubeMatrix[i][j][2];
+		Vector3 axis = Vector3.forward;
+
+		if (relativeToCamera)
+			axis = -GetCameraRelativeForwardRightUpVectors()[2];
+
+		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateAround(Vector3.forward, Vector3.forward, angle));
+		StartCoroutine(RotateCoroutine(axis, axis, angle));
+
 	}
 
 
-	public void Up()
+	public void RotateUp()
 	{
 		if (coroutineRunning)
 			return;
 
-		selected = new Transform[9];
-		int k = 0;
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++, k++)
-				selected[k] = cubeMatrix[i][2][j];
+		Vector3 axis = Vector3.up;
+
+		if (relativeToCamera)
+			axis = GetCameraRelativeForwardRightUpVectors()[1];
+
+		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateAround(Vector3.up, Vector3.up, angle));
+		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
 
-	public void Down()
+	public void RotateDown()
 	{
 		if (coroutineRunning)
 			return;
 
-		selected = new Transform[9];
-		int k = 0;
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++, k++)
-				selected[k] = cubeMatrix[i][0][j];
+		Vector3 axis = Vector3.up;
+
+		if (relativeToCamera)
+			axis = -GetCameraRelativeForwardRightUpVectors()[1];
+
+		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateAround(Vector3.down, Vector3.down, angle));
+		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
 
 	public void OnToggleValueChanged(Toggle toggle)
 	{
 		counterClockwise = toggle.isOn;
+	}
+
+
+	static Vector3 RoundToInt(Vector3 eulerAngles)
+	{
+		eulerAngles.x = Mathf.Round(eulerAngles.x / 90) * 90;
+		eulerAngles.y = Mathf.Round(eulerAngles.y / 90) * 90;
+		eulerAngles.z = Mathf.Round(eulerAngles.z / 90) * 90;
+
+		return eulerAngles;
 	}
 }

@@ -5,13 +5,11 @@ using UnityEngine;
 
 public class Cubie : MonoBehaviour
 {
-	Dictionary<MeshRenderer, Vector3> dictVectorFromMesh = new Dictionary<MeshRenderer, Vector3>();
-
-	Facelet[] facelets = new Facelet[6];
-
 	public MeshRenderer[] panels;
-	public Vector3 axis;
+	private Dictionary<MeshRenderer, Vector3> dictVectorFromMesh = new Dictionary<MeshRenderer, Vector3>();
+	private Facelet[] facelets = new Facelet[6];
 
+	/// //////////////////////////////////////////////////////////
 
 	void Awake()
 	{
@@ -42,25 +40,6 @@ public class Cubie : MonoBehaviour
 		facelets[side].color = color;
 
 		RefreshPanelsColor();
-	}
-
-	[ContextMenu("Rotate")]
-	public void Rotate()
-	{
-		RotateFacelets(axis);
-		RefreshPanelsColor();
-	}
-
-
-	private void RotateFacelets(Vector3 axis)
-	{
-		Quaternion rotation = Quaternion.AngleAxis(90f, axis);
-
-		for (int i = 0; i < 6; i++)
-		{
-			Vector3 newNormal = rotation * facelets[i].normal;
-			facelets[i].normal = new Vector3(Mathf.RoundToInt(newNormal.x), Mathf.RoundToInt(newNormal.y), Mathf.RoundToInt(newNormal.z));
-		}
 	}
 
 
