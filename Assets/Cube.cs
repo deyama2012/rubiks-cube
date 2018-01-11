@@ -105,9 +105,7 @@ public class Cube : MonoBehaviour
 		for (int x = 0; x < 3; x++)
 			for (int y = 0; y < 3; y++)
 				for (int z = 0; z < 3; z++, m++)
-				{
 					cubies[m] = cubeMatrix[x][y][z];
-				}
 
 		return cubies;
 	}
@@ -210,42 +208,6 @@ public class Cube : MonoBehaviour
 	}
 
 
-	public void RotateCubeX()
-	{
-		if (coroutineRunning)
-			return;
-
-		selected = GetAllCubies();
-
-		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateCoroutine(Vector3.zero, Vector3.right, angle));
-	}
-
-
-	public void RotateCubeY()
-	{
-		if (coroutineRunning)
-			return;
-
-		selected = GetAllCubies();
-
-		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateCoroutine(Vector3.zero, Vector3.up, angle));
-	}
-
-
-	public void RotateCubeZ()
-	{
-		if (coroutineRunning)
-			return;
-
-		selected = GetAllCubies();
-
-		int angle = counterClockwise ? -90 : 90;
-		StartCoroutine(RotateCoroutine(Vector3.zero, Vector3.forward, angle));
-	}
-
-
 	IEnumerator RotateCoroutine(Vector3 point, Vector3 axis, float angle)
 	{
 		coroutineRunning = true;
@@ -292,6 +254,63 @@ public class Cube : MonoBehaviour
 	}
 
 
+	#region Cube rotation
+	public void RotateCubeX()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = GetAllCubies();
+
+		Vector3 axis = Vector3.right;
+
+		// if (relativeToCamera)
+		// 	axis = GetCameraRelativeForwardRightUpVectors()[0];
+
+		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberCubeMove(axis, angle);
+		StartCoroutine(RotateCoroutine(Vector3.zero, axis, angle));
+	}
+
+
+	public void RotateCubeY()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = GetAllCubies();
+
+		Vector3 axis = Vector3.up;
+
+		// if (relativeToCamera)
+		// 	axis = GetCameraRelativeForwardRightUpVectors()[1];
+
+		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberCubeMove(axis, angle);
+		StartCoroutine(RotateCoroutine(Vector3.zero, axis, angle));
+	}
+
+
+	public void RotateCubeZ()
+	{
+		if (coroutineRunning)
+			return;
+
+		selected = GetAllCubies();
+
+		Vector3 axis = Vector3.forward;
+
+		// if (relativeToCamera)
+		// 	axis = -GetCameraRelativeForwardRightUpVectors()[2];
+
+		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberCubeMove(axis, angle);
+		StartCoroutine(RotateCoroutine(Vector3.zero, axis, angle));
+	}
+	#endregion
+
+
+	#region Face rotation
 	public void RotateLeft()
 	{
 		if (coroutineRunning)
@@ -305,6 +324,7 @@ public class Cube : MonoBehaviour
 		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
@@ -322,6 +342,7 @@ public class Cube : MonoBehaviour
 		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
@@ -339,6 +360,7 @@ public class Cube : MonoBehaviour
 		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
@@ -356,8 +378,8 @@ public class Cube : MonoBehaviour
 		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(axis, axis, angle));
-
 	}
 
 
@@ -374,6 +396,7 @@ public class Cube : MonoBehaviour
 		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
 
@@ -383,7 +406,7 @@ public class Cube : MonoBehaviour
 		if (coroutineRunning)
 			return;
 
-		Vector3 axis = Vector3.up;
+		Vector3 axis = Vector3.down;
 
 		if (relativeToCamera)
 			axis = -GetCameraRelativeForwardRightUpVectors()[1];
@@ -391,8 +414,10 @@ public class Cube : MonoBehaviour
 		selected = GetFaceCubies(axis);
 
 		int angle = counterClockwise ? -90 : 90;
+		MoveHistory.Instance.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(axis, axis, angle));
 	}
+	#endregion
 
 
 	public void OnToggleValueChanged(Toggle toggle)
