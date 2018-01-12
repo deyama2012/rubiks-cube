@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+
+public enum RotationType { Face, Cube }
 
 public class Cube : MonoBehaviour
 {
@@ -15,9 +18,8 @@ public class Cube : MonoBehaviour
 	private Transform[] selected;
 	private bool coroutineRunning;
 
-	[Header("- Controls -")]
-	public KeyCode front;
-	public KeyCode back, left, right, up, down;
+	[Header("- Controls -"), SerializeField]
+	public Controls controls;
 
 	public bool relativeToCamera;
 
@@ -113,7 +115,9 @@ public class Cube : MonoBehaviour
 
 	void Update()
 	{
-		//PlayerInput();
+#if !UNITY_EDITOR
+		PlayerInput();
+#endif
 
 		Vector3[] xyz = GetCameraRelativeForwardRightUpVectors();
 
@@ -168,49 +172,42 @@ public class Cube : MonoBehaviour
 
 	void PlayerInput()
 	{
-		counterClockwise = Input.GetKey(KeyCode.LeftControl);
+		counterClockwise = Input.GetKey(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl);
 
-		if (Input.GetKeyDown(front))
-		{
+		if (Input.GetKeyDown(controls.front))
 			RotateFront();
-			return;
-		}
 
-		if (Input.GetKeyDown(back))
-		{
+		else if (Input.GetKeyDown(controls.back))
 			RotateBack();
-			return;
-		}
 
-		if (Input.GetKeyDown(left))
-		{
+		else if (Input.GetKeyDown(controls.left))
 			RotateLeft();
-			return;
-		}
 
-		if (Input.GetKeyDown(right))
-		{
+		else if (Input.GetKeyDown(controls.right))
 			RotateRight();
-			return;
-		}
 
-		if (Input.GetKeyDown(up))
-		{
+		else if (Input.GetKeyDown(controls.up))
 			RotateUp();
-			return;
-		}
 
-		if (Input.GetKeyDown(down))
-		{
+		else if (Input.GetKeyDown(controls.down))
 			RotateDown();
-			return;
-		}
+
+		else if (Input.GetKeyDown(controls.x))
+			RotateCubeX();
+
+		else if (Input.GetKeyDown(controls.y))
+			RotateCubeY();
+
+		else if (Input.GetKeyDown(controls.z))
+			RotateCubeZ();
 	}
 
 
-	IEnumerator RotateCoroutine(Vector3 point, Vector3 axis, float angle)
+	IEnumerator RotateCoroutine(RotationType rotationType, Vector3 axis, float angle)
 	{
 		coroutineRunning = true;
+
+		Vector3 point = rotationType == RotationType.Face ? axis : Vector3.zero;
 
 		Vector3[] positions = new Vector3[selected.Length];
 		Quaternion[] rotations = new Quaternion[selected.Length];
@@ -254,6 +251,48 @@ public class Cube : MonoBehaviour
 	}
 
 
+	public void Undo()
+	{
+		if (coroutineRunning)
+			return;
+
+		MoveInfo info;
+		if (MoveHistory.Instance.TryUndo(out info))
+		{
+			if (info.type == RotationType.Face)
+				selected = GetFaceCubies(info.axis);
+			else
+				selected = GetAllCubies();
+
+			StartCoroutine(RotateCoroutine(info.type, info.axis, info.angle));
+		}
+	}
+
+
+	public void UndoAll()
+	{
+		if (coroutineRunning)
+			return;
+
+		StartCoroutine(UndoAllCoroutine());
+	}
+
+
+	IEnumerator UndoAllCoroutine()
+	{
+		MoveInfo info;
+		while (MoveHistory.Instance.TryUndo(out info))
+		{
+			if (info.type == RotationType.Face)
+				selected = GetFaceCubies(info.axis);
+			else
+				selected = GetAllCubies();
+
+			yield return StartCoroutine(RotateCoroutine(info.type, info.axis, info.angle));
+		}
+	}
+
+
 	#region Cube rotation
 	public void RotateCubeX()
 	{
@@ -269,7 +308,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberCubeMove(axis, angle);
-		StartCoroutine(RotateCoroutine(Vector3.zero, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Cube, axis, angle));
 	}
 
 
@@ -287,7 +326,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberCubeMove(axis, angle);
-		StartCoroutine(RotateCoroutine(Vector3.zero, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Cube, axis, angle));
 	}
 
 
@@ -305,7 +344,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberCubeMove(axis, angle);
-		StartCoroutine(RotateCoroutine(Vector3.zero, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Cube, axis, angle));
 	}
 	#endregion
 
@@ -325,7 +364,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(axis, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
 	}
 
 
@@ -343,7 +382,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(axis, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
 	}
 
 
@@ -361,7 +400,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(axis, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
 	}
 
 
@@ -379,7 +418,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(axis, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
 	}
 
 
@@ -397,7 +436,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(axis, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
 	}
 
 
@@ -415,7 +454,7 @@ public class Cube : MonoBehaviour
 
 		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(axis, axis, angle));
+		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
 	}
 	#endregion
 
@@ -434,4 +473,10 @@ public class Cube : MonoBehaviour
 
 		return eulerAngles;
 	}
+}
+
+[Serializable]
+public class Controls
+{
+	public KeyCode front, back, left, right, up, down, x, y, z;
 }

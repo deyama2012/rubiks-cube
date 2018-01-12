@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +13,10 @@ public class MoveHistory : MonoBehaviour
 	public static MoveHistory Instance { get { return _instance; } }
 
 	[SerializeField]
-	private List<Moves> moves = new List<Moves>();
+	private List<Moves> listMoveNames = new List<Moves>();
+	private List<MoveInfo> listMoveInfo = new List<MoveInfo>();
 
-	public Text movesLog;
+	public Text textLog;
 
 	public bool stopLogging;
 
@@ -26,7 +29,9 @@ public class MoveHistory : MonoBehaviour
 		else
 			_instance = this;
 
-		movesLog.text = string.Empty;
+		textLog.text = string.Empty;
+
+		listMoveNames.Clear();
 	}
 
 
@@ -55,9 +60,10 @@ public class MoveHistory : MonoBehaviour
 		else
 			move = angle > 0 ? Moves.D : Moves.Di;
 
-		moves.Add(move);
+		listMoveNames.Add(move);
+		listMoveInfo.Add(new MoveInfo(RotationType.Face, axis, angle));
 
-		movesLog.text += move.ToString() + " ";
+		RefreshLog();
 	}
 
 
@@ -77,8 +83,51 @@ public class MoveHistory : MonoBehaviour
 		else
 			move = angle > 0 ? Moves.Y : Moves.Zi;
 
-		moves.Add(move);
+		listMoveNames.Add(move);
+		listMoveInfo.Add(new MoveInfo(RotationType.Cube, axis, angle));
 
-		movesLog.text += move.ToString() + " ";
+		RefreshLog();
+	}
+
+
+	public bool TryUndo(out MoveInfo moveInfo)
+	{
+		if (listMoveNames.Count > 0 && listMoveInfo.Count > 0)
+		{
+			listMoveNames.RemoveAt(listMoveNames.Count - 1);
+			moveInfo = listMoveInfo[listMoveInfo.Count - 1];
+			moveInfo.angle = -moveInfo.angle;
+			listMoveInfo.RemoveAt(listMoveInfo.Count - 1);
+			RefreshLog();
+			return true;
+		}
+		moveInfo = default(MoveInfo);
+		return false;
+	}
+
+
+	void RefreshLog()
+	{
+		StringBuilder builder = new StringBuilder();
+
+		foreach (var move in listMoveNames)
+			builder.Append(move + " ");
+
+		textLog.text = builder.ToString();
+	}
+}
+
+[Serializable]
+public struct MoveInfo
+{
+	public RotationType type;
+	public Vector3 axis;
+	public int angle;
+
+	public MoveInfo(RotationType type, Vector3 axis, int angle)
+	{
+		this.type = type;
+		this.axis = axis;
+		this.angle = angle;
 	}
 }
