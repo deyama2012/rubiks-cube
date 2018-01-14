@@ -119,11 +119,9 @@ public class Cube : MonoBehaviour
 		PlayerInput();
 #endif
 
-		Vector3[] xyz = GetCameraRelativeForwardRightUpVectors();
-
-		Vector3 x = xyz[0];
-		Vector3 y = xyz[1];
-		Vector3 z = xyz[2];
+		Vector3 x = GetCameraAlignedVector(transform.right);
+		Vector3 y = GetCameraAlignedVector(transform.up);
+		Vector3 z = GetCameraAlignedVector(-transform.forward);
 
 		Debug.DrawRay(transform.position, z * 3, Color.blue);
 		Debug.DrawRay(transform.position, x * 3, Color.red);
@@ -131,28 +129,30 @@ public class Cube : MonoBehaviour
 	}
 
 
-	Vector3[] GetCameraRelativeForwardRightUpVectors()
+	Vector3 GetCameraAlignedVector(Vector3 vector)
 	{
 		Vector3[] normals = { transform.forward, -transform.forward, transform.right, -transform.right, transform.up, -transform.up };
 
+		// Forward
 		float maxDotProductZ = 0;
-		Vector3 z = Vector3.zero;
+		Vector3 forward = Vector3.zero;
 		foreach (var normal in normals)
 		{
-			float dotProductZ = Vector3.Dot(-Camera.main.transform.forward, normal);
+			float dotProductZ = Vector3.Dot(Camera.main.transform.forward, normal);
 
 			if (dotProductZ > maxDotProductZ)
 			{
 				maxDotProductZ = dotProductZ;
-				z = normal;
+				forward = normal;
 			}
 		}
 
+		// Up
 		float maxDotProductY = 0;
-		Vector3 y = Vector3.zero;
+		Vector3 up = Vector3.zero;
 		foreach (var normal in normals)
 		{
-			if (normal == z || normal == -z)
+			if (normal == forward || normal == -forward)
 				continue;
 
 			float dotProductY = Vector3.Dot(Camera.main.transform.up, normal);
@@ -160,13 +160,15 @@ public class Cube : MonoBehaviour
 			if (dotProductY > maxDotProductY)
 			{
 				maxDotProductY = dotProductY;
-				y = normal;
+				up = normal;
 			}
 		}
 
-		Vector3 x = Vector3.Cross(z, y);
+		// Right
+		Vector3 right = Vector3.Cross(forward, up);
 
-		return new [] { x, y, z };
+		Quaternion rotation = Quaternion.LookRotation(forward, up);
+		return rotation * vector;
 	}
 
 
@@ -293,6 +295,61 @@ public class Cube : MonoBehaviour
 	}
 
 
+	public void ClearHistory()
+	{
+		if (!coroutineRunning)
+			MoveHistory.Instance.ClearHistory();
+	}
+
+	[ContextMenu("Do test sequence")]
+	public void DoTestSequence()
+	{
+		if (!coroutineRunning)
+			StartCoroutine(DoSequence(MoveSequences.sequenceB));
+	}
+
+
+	//IEnumerator DoSequence(MoveInfo[] moveSequence)
+	IEnumerator DoSequence(Moves[] moveSequence)
+	{
+		foreach (var move in moveSequence)
+		{
+			Vector3 axis = MoveSequences.AxisFromMoveName[move];
+
+			if (relativeToCamera)
+				axis = GetCameraAlignedVector(axis);
+
+			int angle = MoveSequences.AngleFromMoveName(move);
+			RotationType type = (int) move < 12 ? RotationType.Face : RotationType.Cube;
+
+			if (type == RotationType.Face)
+			{
+				selected = GetFaceCubies(axis);
+				MoveHistory.Instance.RememberFaceMove(axis, angle);
+			}
+			else
+			{
+				selected = GetAllCubies();
+				MoveHistory.Instance.RememberCubeMove(axis, angle);
+			}
+
+			yield return StartCoroutine(RotateCoroutine(type, axis, angle));
+
+			//			if (move.type == RotationType.Face)
+			//			{
+			//				selected = GetFaceCubies(move.axis);
+			//				MoveHistory.Instance.RememberFaceMove(move.axis, move.angle);
+			//			}
+			//			else
+			//			{
+			//				selected = GetAllCubies();
+			//				MoveHistory.Instance.RememberCubeMove(move.axis, move.angle);
+			//			}
+			//			yield return StartCoroutine(RotateCoroutine(move.type, move.axis, move.angle));
+		}
+	}
+
+
 	#region Cube rotation
 	public void RotateCubeX()
 	{
@@ -358,7 +415,7 @@ public class Cube : MonoBehaviour
 		Vector3 axis = Vector3.left;
 
 		if (relativeToCamera)
-			axis = -GetCameraRelativeForwardRightUpVectors()[0];
+			axis = GetCameraAlignedVector(axis);
 
 		selected = GetFaceCubies(axis);
 
@@ -376,7 +433,7 @@ public class Cube : MonoBehaviour
 		Vector3 axis = Vector3.right;
 
 		if (relativeToCamera)
-			axis = GetCameraRelativeForwardRightUpVectors()[0];
+			axis = GetCameraAlignedVector(axis);
 
 		selected = GetFaceCubies(axis);
 
@@ -394,7 +451,7 @@ public class Cube : MonoBehaviour
 		Vector3 axis = Vector3.back;
 
 		if (relativeToCamera)
-			axis = GetCameraRelativeForwardRightUpVectors()[2];
+			axis = GetCameraAlignedVector(axis);
 
 		selected = GetFaceCubies(axis);
 
@@ -412,7 +469,7 @@ public class Cube : MonoBehaviour
 		Vector3 axis = Vector3.forward;
 
 		if (relativeToCamera)
-			axis = -GetCameraRelativeForwardRightUpVectors()[2];
+			axis = GetCameraAlignedVector(axis);
 
 		selected = GetFaceCubies(axis);
 
@@ -430,7 +487,7 @@ public class Cube : MonoBehaviour
 		Vector3 axis = Vector3.up;
 
 		if (relativeToCamera)
-			axis = GetCameraRelativeForwardRightUpVectors()[1];
+			axis = GetCameraAlignedVector(axis);
 
 		selected = GetFaceCubies(axis);
 
@@ -448,7 +505,7 @@ public class Cube : MonoBehaviour
 		Vector3 axis = Vector3.down;
 
 		if (relativeToCamera)
-			axis = -GetCameraRelativeForwardRightUpVectors()[1];
+			axis = GetCameraAlignedVector(axis);
 
 		selected = GetFaceCubies(axis);
 

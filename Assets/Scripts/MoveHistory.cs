@@ -33,7 +33,7 @@ public class MoveHistory : MonoBehaviour
 
 		listMoveNames.Clear();
 	}
-
+	
 
 	public void RememberFaceMove(Vector3 axis, int angle)
 	{
@@ -114,6 +114,14 @@ public class MoveHistory : MonoBehaviour
 			builder.Append(move + " ");
 
 		textLog.text = builder.ToString();
+	}
+	
+	
+	public void ClearHistory()
+	{
+		listMoveNames.Clear();
+		listMoveInfo.Clear();
+		RefreshLog();
 	}
 }
 
