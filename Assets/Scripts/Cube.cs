@@ -12,14 +12,10 @@ public class Cube : MonoBehaviour
 	public GameObject cubiePrefab;
 
 	public float duration = 0.5f;
-	public bool counterClockwise;
 
 	private Transform[][][] cubeMatrix = new Transform[3][][];
 	private Transform[] selected;
 	private bool coroutineRunning;
-
-	[Header("- Controls -"), SerializeField]
-	public Controls controls;
 
 	public bool relativeToCamera;
 
@@ -115,10 +111,6 @@ public class Cube : MonoBehaviour
 
 	void Update()
 	{
-#if !UNITY_EDITOR
-		PlayerInput();
-#endif
-
 		Vector3 x = GetCameraAlignedVector(transform.right);
 		Vector3 y = GetCameraAlignedVector(transform.up);
 		Vector3 z = GetCameraAlignedVector(-transform.forward);
@@ -169,39 +161,6 @@ public class Cube : MonoBehaviour
 
 		Quaternion rotation = Quaternion.LookRotation(forward, up);
 		return rotation * vector;
-	}
-
-
-	void PlayerInput()
-	{
-		counterClockwise = Input.GetKey(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl);
-
-		if (Input.GetKeyDown(controls.front))
-			RotateFront();
-
-		else if (Input.GetKeyDown(controls.back))
-			RotateBack();
-
-		else if (Input.GetKeyDown(controls.left))
-			RotateLeft();
-
-		else if (Input.GetKeyDown(controls.right))
-			RotateRight();
-
-		else if (Input.GetKeyDown(controls.up))
-			RotateUp();
-
-		else if (Input.GetKeyDown(controls.down))
-			RotateDown();
-
-		else if (Input.GetKeyDown(controls.x))
-			RotateCubeX();
-
-		else if (Input.GetKeyDown(controls.y))
-			RotateCubeY();
-
-		else if (Input.GetKeyDown(controls.z))
-			RotateCubeZ();
 	}
 
 
@@ -305,21 +264,21 @@ public class Cube : MonoBehaviour
 	public void DoTestSequence()
 	{
 		if (!coroutineRunning)
-			StartCoroutine(DoSequence(MoveSequences.sequenceB));
+			StartCoroutine(DoSequence(MoveSequence.squareInTheMiddle));
 	}
 
 
-	//IEnumerator DoSequence(MoveInfo[] moveSequence)
+	// TODO Cache camera position and use it throughout the sequence
 	IEnumerator DoSequence(Moves[] moveSequence)
 	{
 		foreach (var move in moveSequence)
 		{
-			Vector3 axis = MoveSequences.AxisFromMoveName[move];
+			Vector3 axis = MoveSequence.AxisFromMoveName[move];
 
 			if (relativeToCamera)
 				axis = GetCameraAlignedVector(axis);
 
-			int angle = MoveSequences.AngleFromMoveName(move);
+			int angle = MoveSequence.AngleFromMoveName(move);
 			RotationType type = (int) move < 12 ? RotationType.Face : RotationType.Cube;
 
 			if (type == RotationType.Face)
@@ -334,191 +293,34 @@ public class Cube : MonoBehaviour
 			}
 
 			yield return StartCoroutine(RotateCoroutine(type, axis, angle));
-
-			//			if (move.type == RotationType.Face)
-			//			{
-			//				selected = GetFaceCubies(move.axis);
-			//				MoveHistory.Instance.RememberFaceMove(move.axis, move.angle);
-			//			}
-			//			else
-			//			{
-			//				selected = GetAllCubies();
-			//				MoveHistory.Instance.RememberCubeMove(move.axis, move.angle);
-			//			}
-			//			yield return StartCoroutine(RotateCoroutine(move.type, move.axis, move.angle));
 		}
 	}
 
 
-	#region Cube rotation
-	public void RotateCubeX()
+	public void RotateCube(Vector3 axis, int angle)
 	{
 		if (coroutineRunning)
 			return;
 
 		selected = GetAllCubies();
 
-		Vector3 axis = Vector3.right;
-
-		// if (relativeToCamera)
-		// 	axis = GetCameraRelativeForwardRightUpVectors()[0];
-
-		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberCubeMove(axis, angle);
 		StartCoroutine(RotateCoroutine(RotationType.Cube, axis, angle));
 	}
 
 
-	public void RotateCubeY()
+	public void RotateFace(Vector3 axis, int angle)
 	{
 		if (coroutineRunning)
 			return;
-
-		selected = GetAllCubies();
-
-		Vector3 axis = Vector3.up;
-
-		// if (relativeToCamera)
-		// 	axis = GetCameraRelativeForwardRightUpVectors()[1];
-
-		int angle = counterClockwise ? -90 : 90;
-		MoveHistory.Instance.RememberCubeMove(axis, angle);
-		StartCoroutine(RotateCoroutine(RotationType.Cube, axis, angle));
-	}
-
-
-	public void RotateCubeZ()
-	{
-		if (coroutineRunning)
-			return;
-
-		selected = GetAllCubies();
-
-		Vector3 axis = Vector3.forward;
-
-		// if (relativeToCamera)
-		// 	axis = -GetCameraRelativeForwardRightUpVectors()[2];
-
-		int angle = counterClockwise ? -90 : 90;
-		MoveHistory.Instance.RememberCubeMove(axis, angle);
-		StartCoroutine(RotateCoroutine(RotationType.Cube, axis, angle));
-	}
-	#endregion
-
-
-	#region Face rotation
-	public void RotateLeft()
-	{
-		if (coroutineRunning)
-			return;
-
-		Vector3 axis = Vector3.left;
 
 		if (relativeToCamera)
 			axis = GetCameraAlignedVector(axis);
 
 		selected = GetFaceCubies(axis);
 
-		int angle = counterClockwise ? -90 : 90;
 		MoveHistory.Instance.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
-	}
-
-
-	public void RotateRight()
-	{
-		if (coroutineRunning)
-			return;
-
-		Vector3 axis = Vector3.right;
-
-		if (relativeToCamera)
-			axis = GetCameraAlignedVector(axis);
-
-		selected = GetFaceCubies(axis);
-
-		int angle = counterClockwise ? -90 : 90;
-		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
-	}
-
-
-	public void RotateFront()
-	{
-		if (coroutineRunning)
-			return;
-
-		Vector3 axis = Vector3.back;
-
-		if (relativeToCamera)
-			axis = GetCameraAlignedVector(axis);
-
-		selected = GetFaceCubies(axis);
-
-		int angle = counterClockwise ? -90 : 90;
-		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
-	}
-
-
-	public void RotateBack()
-	{
-		if (coroutineRunning)
-			return;
-
-		Vector3 axis = Vector3.forward;
-
-		if (relativeToCamera)
-			axis = GetCameraAlignedVector(axis);
-
-		selected = GetFaceCubies(axis);
-
-		int angle = counterClockwise ? -90 : 90;
-		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
-	}
-
-
-	public void RotateUp()
-	{
-		if (coroutineRunning)
-			return;
-
-		Vector3 axis = Vector3.up;
-
-		if (relativeToCamera)
-			axis = GetCameraAlignedVector(axis);
-
-		selected = GetFaceCubies(axis);
-
-		int angle = counterClockwise ? -90 : 90;
-		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
-	}
-
-
-	public void RotateDown()
-	{
-		if (coroutineRunning)
-			return;
-
-		Vector3 axis = Vector3.down;
-
-		if (relativeToCamera)
-			axis = GetCameraAlignedVector(axis);
-
-		selected = GetFaceCubies(axis);
-
-		int angle = counterClockwise ? -90 : 90;
-		MoveHistory.Instance.RememberFaceMove(axis, angle);
-		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
-	}
-	#endregion
-
-
-	public void OnToggleValueChanged(Toggle toggle)
-	{
-		counterClockwise = toggle.isOn;
 	}
 
 
@@ -530,10 +332,4 @@ public class Cube : MonoBehaviour
 
 		return eulerAngles;
 	}
-}
-
-[Serializable]
-public class Controls
-{
-	public KeyCode front, back, left, right, up, down, x, y, z;
 }

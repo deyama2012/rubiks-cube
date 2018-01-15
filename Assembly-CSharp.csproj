@@ -53,8 +53,9 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Cube.cs" />
      <Compile Include="Assets\Scripts\Cubie.cs" />
+     <Compile Include="Assets\Scripts\InputManager.cs" />
      <Compile Include="Assets\Scripts\MoveHistory.cs" />
-     <Compile Include="Assets\Scripts\MoveSequences.cs" />
+     <Compile Include="Assets\Scripts\MoveSequence.cs" />
      <Compile Include="Assets\Scripts\OrbitCamera.cs" />
      <Compile Include="Assets\Scripts\SelectionBase.cs" />
  <Reference Include="UnityEngine.UI">
