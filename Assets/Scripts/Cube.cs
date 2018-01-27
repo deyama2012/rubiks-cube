@@ -11,6 +11,7 @@ public class Cube : MonoBehaviour
 {
 	public GameObject cubiePrefab;
 
+	[Range(0.3f, 2f)]
 	public float duration = 0.5f;
 
 	private Transform[][][] cubeMatrix = new Transform[3][][];
@@ -18,6 +19,8 @@ public class Cube : MonoBehaviour
 	private bool coroutineRunning;
 
 	public bool relativeToCamera;
+	
+	private MoveHistory moveHistory;
 
 	/// ///////////////////////////////////////////////
 
@@ -51,6 +54,8 @@ public class Cube : MonoBehaviour
 				cubeMatrix[i][2][j].GetComponent<Cubie>().SetColor(4, Color.green);
 				cubeMatrix[i][0][j].GetComponent<Cubie>().SetColor(5, Color.blue);
 			}
+		
+		moveHistory = GetComponent<MoveHistory>();
 	}
 
 
@@ -109,16 +114,16 @@ public class Cube : MonoBehaviour
 	}
 
 
-	void Update()
-	{
-		Vector3 x = GetCameraAlignedVector(transform.right);
-		Vector3 y = GetCameraAlignedVector(transform.up);
-		Vector3 z = GetCameraAlignedVector(-transform.forward);
-
-		Debug.DrawRay(transform.position, z * 3, Color.blue);
-		Debug.DrawRay(transform.position, x * 3, Color.red);
-		Debug.DrawRay(transform.position, y * 3, Color.green);
-	}
+//	void Update()
+//	{
+//		Vector3 x = GetCameraAlignedVector(transform.right);
+//		Vector3 y = GetCameraAlignedVector(transform.up);
+//		Vector3 z = GetCameraAlignedVector(-transform.forward);
+//
+//		Debug.DrawRay(transform.position, z * 3, Color.blue);
+//		Debug.DrawRay(transform.position, x * 3, Color.red);
+//		Debug.DrawRay(transform.position, y * 3, Color.green);
+//	}
 
 
 	Vector3 GetCameraAlignedVector(Vector3 vector)
@@ -156,11 +161,47 @@ public class Cube : MonoBehaviour
 			}
 		}
 
-		// Right
-		Vector3 right = Vector3.Cross(forward, up);
-
 		Quaternion rotation = Quaternion.LookRotation(forward, up);
 		return rotation * vector;
+	}
+	
+	
+	Quaternion GetCameraRotation()
+	{
+		Vector3[] normals = { transform.forward, -transform.forward, transform.right, -transform.right, transform.up, -transform.up };
+
+		// Forward
+		float maxDotProductZ = 0;
+		Vector3 forward = Vector3.zero;
+		foreach (var normal in normals)
+		{
+			float dotProductZ = Vector3.Dot(Camera.main.transform.forward, normal);
+
+			if (dotProductZ > maxDotProductZ)
+			{
+				maxDotProductZ = dotProductZ;
+				forward = normal;
+			}
+		}
+
+		// Up
+		float maxDotProductY = 0;
+		Vector3 up = Vector3.zero;
+		foreach (var normal in normals)
+		{
+			if (normal == forward || normal == -forward)
+				continue;
+
+			float dotProductY = Vector3.Dot(Camera.main.transform.up, normal);
+
+			if (dotProductY > maxDotProductY)
+			{
+				maxDotProductY = dotProductY;
+				up = normal;
+			}
+		}
+
+		return Quaternion.LookRotation(forward, up);
 	}
 
 
@@ -218,7 +259,7 @@ public class Cube : MonoBehaviour
 			return;
 
 		MoveInfo info;
-		if (MoveHistory.Instance.TryUndo(out info))
+		if (moveHistory.TryUndo(out info))
 		{
 			if (info.type == RotationType.Face)
 				selected = GetFaceCubies(info.axis);
@@ -242,7 +283,7 @@ public class Cube : MonoBehaviour
 	IEnumerator UndoAllCoroutine()
 	{
 		MoveInfo info;
-		while (MoveHistory.Instance.TryUndo(out info))
+		while (moveHistory.TryUndo(out info))
 		{
 			if (info.type == RotationType.Face)
 				selected = GetFaceCubies(info.axis);
@@ -257,26 +298,28 @@ public class Cube : MonoBehaviour
 	public void ClearHistory()
 	{
 		if (!coroutineRunning)
-			MoveHistory.Instance.ClearHistory();
+			moveHistory.ClearHistory();
 	}
 
-	[ContextMenu("Do test sequence")]
-	public void DoTestSequence()
+	
+	public void DoSequence(Moves[] moveSequence)
 	{
 		if (!coroutineRunning)
-			StartCoroutine(DoSequence(MoveSequence.squareInTheMiddle));
+			StartCoroutine(DoSequenceCoroutine(moveSequence));
 	}
 
 
 	// TODO Cache camera position and use it throughout the sequence
-	IEnumerator DoSequence(Moves[] moveSequence)
+	IEnumerator DoSequenceCoroutine(Moves[] moveSequence)
 	{
+		Quaternion camRot = GetCameraRotation();
+		
 		foreach (var move in moveSequence)
 		{
 			Vector3 axis = MoveSequence.AxisFromMoveName[move];
 
 			if (relativeToCamera)
-				axis = GetCameraAlignedVector(axis);
+				axis = camRot * axis;
 
 			int angle = MoveSequence.AngleFromMoveName(move);
 			RotationType type = (int) move < 12 ? RotationType.Face : RotationType.Cube;
@@ -284,12 +327,12 @@ public class Cube : MonoBehaviour
 			if (type == RotationType.Face)
 			{
 				selected = GetFaceCubies(axis);
-				MoveHistory.Instance.RememberFaceMove(axis, angle);
+				moveHistory.RememberFaceMove(axis, angle);
 			}
 			else
 			{
 				selected = GetAllCubies();
-				MoveHistory.Instance.RememberCubeMove(axis, angle);
+				moveHistory.RememberCubeMove(axis, angle);
 			}
 
 			yield return StartCoroutine(RotateCoroutine(type, axis, angle));
@@ -304,7 +347,7 @@ public class Cube : MonoBehaviour
 
 		selected = GetAllCubies();
 
-		MoveHistory.Instance.RememberCubeMove(axis, angle);
+		moveHistory.RememberCubeMove(axis, angle);
 		StartCoroutine(RotateCoroutine(RotationType.Cube, axis, angle));
 	}
 
@@ -319,7 +362,7 @@ public class Cube : MonoBehaviour
 
 		selected = GetFaceCubies(axis);
 
-		MoveHistory.Instance.RememberFaceMove(axis, angle);
+		moveHistory.RememberFaceMove(axis, angle);
 		StartCoroutine(RotateCoroutine(RotationType.Face, axis, angle));
 	}
 

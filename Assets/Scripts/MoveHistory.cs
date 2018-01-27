@@ -9,9 +9,6 @@ public enum Moves { F = 0, Fi, B, Bi, L, Li, R, Ri, U, Ui, D, Di, X, Xi, Y, Yi, 
 
 public class MoveHistory : MonoBehaviour
 {
-	private static MoveHistory _instance;
-	public static MoveHistory Instance { get { return _instance; } }
-
 	[SerializeField]
 	private List<Moves> listMoveNames = new List<Moves>();
 	private List<MoveInfo> listMoveInfo = new List<MoveInfo>();
@@ -24,11 +21,6 @@ public class MoveHistory : MonoBehaviour
 
 	void Awake()
 	{
-		if (_instance != null && _instance != this)
-			Destroy(_instance);
-		else
-			_instance = this;
-
 		textLog.text = string.Empty;
 
 		listMoveNames.Clear();
