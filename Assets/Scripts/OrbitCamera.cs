@@ -20,6 +20,10 @@ public class OrbitCamera : MonoBehaviour
     Vector3 defaultPos;
     Quaternion defaultRot;
 
+    [Header("Turn table")]
+    public bool turnTable;
+    public float turnSpeed = 100;
+
     /// /////////////////////////////////////////////////////////
 
     void Start()
@@ -38,7 +42,7 @@ public class OrbitCamera : MonoBehaviour
     void LateUpdate()
     {
         // Orbiting (rotation)
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1) || turnTable)
             Rotation();
 
         // Zoom
@@ -52,8 +56,14 @@ public class OrbitCamera : MonoBehaviour
 
     void Rotation()
     {
-        x += Input.GetAxis("Mouse X") * xSpeed * Time.deltaTime;
-        y -= Input.GetAxis("Mouse Y") * ySpeed * Time.deltaTime;
+        if (turnTable)
+            x += turnSpeed * Time.deltaTime;
+
+        else
+        {
+            x += Input.GetAxis("Mouse X") * xSpeed * Time.deltaTime;
+            y -= Input.GetAxis("Mouse Y") * ySpeed * Time.deltaTime;
+        }
 
         Quaternion rotation = Quaternion.Euler(y, x, 0);
 
