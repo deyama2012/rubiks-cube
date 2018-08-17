@@ -1,5 +1,7 @@
 # Rubik's Cube
 
+![Example](https://i.imgur.com/8NFzDie.gif)
+
 ## Description
 
 A small project I started to better understand and visualize the process of solving Rubik's cube.
