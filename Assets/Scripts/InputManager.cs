@@ -17,15 +17,15 @@ public class InputManager : MonoBehaviour
 		rubiksCube = GetComponent<Cube>();
 	}
 
-	
+
 	void Update()
 	{
-		#if !UNITY_EDITOR
-		PlayerInput();
-		#endif
+		//#if !UNITY_EDITOR
+		//PlayerInput();
+		//#endif
 	}
 
-	
+
 	void PlayerInput()
 	{
 		counterClockwise = Input.GetKey(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl);
@@ -128,80 +128,80 @@ public class InputManager : MonoBehaviour
 		rubiksCube.ClearHistory();
 	}
 	#endregion
-	
-	
+
+
 	#region Sequences
 	public void DoSequence0()
 	{
 		rubiksCube.DoSequence(MoveSequence.middleLayer_Clockwise);
 	}
-	
+
 	public void DoSequence1()
 	{
 		rubiksCube.DoSequence(MoveSequence.middleLayer_CounterClockwise);
 	}
-	
+
 	public void DoSequence2()
 	{
 		rubiksCube.DoSequence(MoveSequence.yellowCrossA);
 	}
-	
+
 	public void DoSequence3()
 	{
 		rubiksCube.DoSequence(MoveSequence.yellowCrossB);
 	}
-	
+
 	public void DoSequence4()
 	{
 		rubiksCube.DoSequence(MoveSequence.yellowFace);
 	}
-	
+
 	public void DoSequence5()
 	{
 		rubiksCube.DoSequence(MoveSequence.yellowCorners);
 	}
-	
+
 	public void DoSequence6()
 	{
 		rubiksCube.DoSequence(MoveSequence.yellowEdges_Clockwise);
 	}
-	
+
 	public void DoSequence7()
 	{
 		rubiksCube.DoSequence(MoveSequence.yellowEdges_CounterClockwise);
 	}
-	
+
 	public void DoSequence8()
 	{
 		rubiksCube.DoSequence(MoveSequence.multiColoredCross);
 	}
-	
+
 	public void DoSequence9()
 	{
 		rubiksCube.DoSequence(MoveSequence.squareInTheMiddle);
 	}
 	#endregion
-	
-	
+
+
 	public void Scramble()
 	{
 		int steps = 10;
 		Moves[] sequence = new Moves[steps];
-		
-		sequence[0] = (Moves)UnityEngine.Random.Range(0, 12);
-		
-		for(int i = 1; i < steps; i++)
+
+		sequence[0] = (Moves) UnityEngine.Random.Range(0, 12);
+
+		for (int i = 1; i < steps; i++)
 		{
 			int move = -1;
 			do
 			{
 				move = UnityEngine.Random.Range(0, 12);
 			}
-			while((int)sequence[i-1] == move + 1 || (int)sequence[i-1] == move - 1);
-			
-			sequence[i] = (Moves)move;
+			while ((int) sequence[i - 1] == move + 1 || (int) sequence[i - 1] == move - 1);
+
+			sequence[i] = (Moves) move;
 		}
-		
+
 		rubiksCube.DoSequence(sequence);
 	}
 
