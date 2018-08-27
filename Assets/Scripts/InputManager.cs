@@ -6,75 +6,38 @@ using UnityEngine.UI;
 
 public class InputManager : MonoBehaviour
 {
-	public Controls controls;
-	private Cube rubiksCube;
+	//public Controls controls;
+	public Cube rubik;
 	public bool counterClockwise;
+	public bool relativeToCamera;
 
 	/// /////////////////////////////////////////////////////////////
 
-	void Start()
-	{
-		rubiksCube = GetComponent<Cube>();
-	}
-
-
 	void Update()
 	{
-		//#if !UNITY_EDITOR
-		//PlayerInput();
-		//#endif
-	}
-
-
-	void PlayerInput()
-	{
-		counterClockwise = Input.GetKey(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl);
-
-		if (Input.GetKeyDown(controls.front))
-			RotateFront();
-
-		else if (Input.GetKeyDown(controls.back))
-			RotateBack();
-
-		else if (Input.GetKeyDown(controls.left))
-			RotateLeft();
-
-		else if (Input.GetKeyDown(controls.right))
-			RotateRight();
-
-		else if (Input.GetKeyDown(controls.up))
-			RotateUp();
-
-		else if (Input.GetKeyDown(controls.down))
-			RotateDown();
-
-		else if (Input.GetKeyDown(controls.x))
-			RotateCubeX();
-
-		else if (Input.GetKeyDown(controls.y))
-			RotateCubeY();
-
-		else if (Input.GetKeyDown(controls.z))
-			RotateCubeZ();
+#if !UNITY_EDITOR
+		if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.Z))
+			rubik.Undo();
+#endif
 	}
 
 
 	#region Cube rotation
 	public void RotateCubeX()
 	{
-		rubiksCube.RotateCube(Vector3.right, counterClockwise ? -90 : 90);
+		rubik.RotateCube(Vector3.right, counterClockwise ? -90 : 90);
 	}
 
 
 	public void RotateCubeY()
 	{
-		rubiksCube.RotateCube(Vector3.up, counterClockwise ? -90 : 90);
+		rubik.RotateCube(Vector3.up, counterClockwise ? -90 : 90);
 	}
 
 
 	public void RotateCubeZ()
 	{
-		rubiksCube.RotateCube(Vector3.forward, counterClockwise ? -90 : 90);
+		rubik.RotateCube(Vector3.forward, counterClockwise ? -90 : 90);
 	}
 	#endregion
 
@@ -82,32 +45,32 @@ public class InputManager : MonoBehaviour
 	#region Face rotation
 	public void RotateLeft()
 	{
-		rubiksCube.RotateFace(Vector3.left, counterClockwise ? -90 : 90);
+		rubik.RotateFace(Vector3.left, counterClockwise ? -90 : 90, relativeToCamera);
 	}
 
 	public void RotateRight()
 	{
-		rubiksCube.RotateFace(Vector3.right, counterClockwise ? -90 : 90);
+		rubik.RotateFace(Vector3.right, counterClockwise ? -90 : 90, relativeToCamera);
 	}
 
 	public void RotateFront()
 	{
-		rubiksCube.RotateFace(Vector3.back, counterClockwise ? -90 : 90);
+		rubik.RotateFace(Vector3.back, counterClockwise ? -90 : 90, relativeToCamera);
 	}
 
 	public void RotateBack()
 	{
-		rubiksCube.RotateFace(Vector3.forward, counterClockwise ? -90 : 90);
+		rubik.RotateFace(Vector3.forward, counterClockwise ? -90 : 90, relativeToCamera);
 	}
 
 	public void RotateUp()
 	{
-		rubiksCube.RotateFace(Vector3.up, counterClockwise ? -90 : 90);
+		rubik.RotateFace(Vector3.up, counterClockwise ? -90 : 90, relativeToCamera);
 	}
 
 	public void RotateDown()
 	{
-		rubiksCube.RotateFace(Vector3.down, counterClockwise ? -90 : 90);
+		rubik.RotateFace(Vector3.down, counterClockwise ? -90 : 90, relativeToCamera);
 	}
 	#endregion
 
@@ -115,17 +78,17 @@ public class InputManager : MonoBehaviour
 	#region History
 	public void Undo()
 	{
-		rubiksCube.Undo();
+		rubik.Undo();
 	}
 
 	public void UndoAll()
 	{
-		rubiksCube.UndoAll();
+		rubik.UndoAll();
 	}
 
 	public void ClearHistory()
 	{
-		rubiksCube.ClearHistory();
+		rubik.ClearHistory();
 	}
 	#endregion
 
@@ -133,52 +96,52 @@ public class InputManager : MonoBehaviour
 	#region Sequences
 	public void DoSequence0()
 	{
-		rubiksCube.DoSequence(MoveSequence.middleLayer_Clockwise);
+		rubik.DoSequence(MoveSequence.middleLayer_Clockwise, relativeToCamera);
 	}
 
 	public void DoSequence1()
 	{
-		rubiksCube.DoSequence(MoveSequence.middleLayer_CounterClockwise);
+		rubik.DoSequence(MoveSequence.middleLayer_CounterClockwise, relativeToCamera);
 	}
 
 	public void DoSequence2()
 	{
-		rubiksCube.DoSequence(MoveSequence.yellowCrossA);
+		rubik.DoSequence(MoveSequence.yellowCrossA, relativeToCamera);
 	}
 
 	public void DoSequence3()
 	{
-		rubiksCube.DoSequence(MoveSequence.yellowCrossB);
+		rubik.DoSequence(MoveSequence.yellowCrossB, relativeToCamera);
 	}
 
 	public void DoSequence4()
 	{
-		rubiksCube.DoSequence(MoveSequence.yellowFace);
+		rubik.DoSequence(MoveSequence.yellowFace, relativeToCamera);
 	}
 
 	public void DoSequence5()
 	{
-		rubiksCube.DoSequence(MoveSequence.yellowCorners);
+		rubik.DoSequence(MoveSequence.yellowCorners, relativeToCamera);
 	}
 
 	public void DoSequence6()
 	{
-		rubiksCube.DoSequence(MoveSequence.yellowEdges_Clockwise);
+		rubik.DoSequence(MoveSequence.yellowEdges_Clockwise, relativeToCamera);
 	}
 
 	public void DoSequence7()
 	{
-		rubiksCube.DoSequence(MoveSequence.yellowEdges_CounterClockwise);
+		rubik.DoSequence(MoveSequence.yellowEdges_CounterClockwise, relativeToCamera);
 	}
 
 	public void DoSequence8()
 	{
-		rubiksCube.DoSequence(MoveSequence.multiColoredCross);
+		rubik.DoSequence(MoveSequence.multiColoredCross, relativeToCamera);
 	}
 
 	public void DoSequence9()
 	{
-		rubiksCube.DoSequence(MoveSequence.squareInTheMiddle);
+		rubik.DoSequence(MoveSequence.squareInTheMiddle, relativeToCamera);
 	}
 	#endregion
 
@@ -202,7 +165,7 @@ public class InputManager : MonoBehaviour
 			sequence[i] = (Moves) move;
 		}
 
-		rubiksCube.DoSequence(sequence);
+		rubik.DoSequence(sequence, relativeToCamera);
 	}
 
 

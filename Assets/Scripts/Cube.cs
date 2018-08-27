@@ -18,8 +18,8 @@ public class Cube : MonoBehaviour
 	private Transform[] selected;
 	private bool coroutineRunning;
 
-	public bool relativeToCamera;
-	
+	//public bool relativeToCamera;
+
 	private MoveHistory moveHistory;
 
 	/// ///////////////////////////////////////////////
@@ -54,7 +54,7 @@ public class Cube : MonoBehaviour
 				cubeMatrix[i][2][j].GetComponent<Cubie>().SetColor(4, Color.green);
 				cubeMatrix[i][0][j].GetComponent<Cubie>().SetColor(5, Color.blue);
 			}
-		
+
 		moveHistory = GetComponent<MoveHistory>();
 	}
 
@@ -114,16 +114,16 @@ public class Cube : MonoBehaviour
 	}
 
 
-//	void Update()
-//	{
-//		Vector3 x = GetCameraAlignedVector(transform.right);
-//		Vector3 y = GetCameraAlignedVector(transform.up);
-//		Vector3 z = GetCameraAlignedVector(-transform.forward);
-//
-//		Debug.DrawRay(transform.position, z * 3, Color.blue);
-//		Debug.DrawRay(transform.position, x * 3, Color.red);
-//		Debug.DrawRay(transform.position, y * 3, Color.green);
-//	}
+	//	void Update()
+	//	{
+	//		Vector3 x = GetCameraAlignedVector(transform.right);
+	//		Vector3 y = GetCameraAlignedVector(transform.up);
+	//		Vector3 z = GetCameraAlignedVector(-transform.forward);
+	//
+	//		Debug.DrawRay(transform.position, z * 3, Color.blue);
+	//		Debug.DrawRay(transform.position, x * 3, Color.red);
+	//		Debug.DrawRay(transform.position, y * 3, Color.green);
+	//	}
 
 
 	Vector3 GetCameraAlignedVector(Vector3 vector)
@@ -164,8 +164,8 @@ public class Cube : MonoBehaviour
 		Quaternion rotation = Quaternion.LookRotation(forward, up);
 		return rotation * vector;
 	}
-	
-	
+
+
 	Quaternion GetCameraRotation()
 	{
 		Vector3[] normals = { transform.forward, -transform.forward, transform.right, -transform.right, transform.up, -transform.up };
@@ -301,19 +301,19 @@ public class Cube : MonoBehaviour
 			moveHistory.ClearHistory();
 	}
 
-	
-	public void DoSequence(Moves[] moveSequence)
+
+	public void DoSequence(Moves[] moveSequence, bool relativeToCamera)
 	{
 		if (!coroutineRunning)
-			StartCoroutine(DoSequenceCoroutine(moveSequence));
+			StartCoroutine(DoSequenceCoroutine(moveSequence, relativeToCamera));
 	}
 
 
 	// TODO Cache camera position and use it throughout the sequence
-	IEnumerator DoSequenceCoroutine(Moves[] moveSequence)
+	IEnumerator DoSequenceCoroutine(Moves[] moveSequence, bool relativeToCamera)
 	{
 		Quaternion camRot = GetCameraRotation();
-		
+
 		foreach (var move in moveSequence)
 		{
 			Vector3 axis = MoveSequence.AxisFromMoveName[move];
@@ -352,7 +352,7 @@ public class Cube : MonoBehaviour
 	}
 
 
-	public void RotateFace(Vector3 axis, int angle)
+	public void RotateFace(Vector3 axis, int angle, bool relativeToCamera)
 	{
 		if (coroutineRunning)
 			return;
