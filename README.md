@@ -4,7 +4,7 @@
 
 ## Description
 
-A small project I started to better understand and visualize the process of solving Rubik's cube.
+A small project I started to better understand and visualize the process of solving Rubik's cube. Play it [here](http://www.quora.com/Adam-DAngelo)
 
 ## Controls
 
@@ -32,7 +32,7 @@ A small project I started to better understand and visualize the process of solv
 
 ## Features
 
-- Faces rotations are relative to the camera
+- Rotations with onscreen controls are relative to the camera. Rotations with mouse aren't
 - Scramble functionality
 - History of moves with '_Undo_', '_Undo all_' and '_Clear history_' functionality
 - Predefined sequences of moves
