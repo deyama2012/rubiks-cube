@@ -8,6 +8,17 @@ A small project I started to better understand and visualize the process of solv
 
 ## Controls
 
+### Mouse
+
+- _Left button click and drag_ - rotate cube face
+- _Right button drag_ - rotate camera around the cube
+- _Scroll wheel_ - zoom
+- _Middle button click_ - reset camera
+
+### Keyboard input
+
+- _Ctrl+Z_ - Undo last move
+
 ### Onscreen controls
 
 - Rotate respective faces with '_Front_', '_Back_', '_Left_', '_Right_', '_Up_', '_Down_' buttons
@@ -18,12 +29,6 @@ A small project I started to better understand and visualize the process of solv
 - Use '_Clear history_' to clear move history
 - Use '_Scramble_' to randomize the cube
 - Use '_Seq_' buttons to permorm predefined sequences of moves, required to solve the cube 
-
-### Mouse
-
-- _Right mouse button drag_ - rotate camera around the cube
-- _Scroll wheel_ - zoom
-- _Middle mouse button click_ - reset camera
 
 ## Features
 
@@ -36,4 +41,4 @@ A small project I started to better understand and visualize the process of solv
 
 - Add solving guide
 - Add descriptions for each of the sequences
-- Add keyboard input
+- Add sound effects
