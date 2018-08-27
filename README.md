@@ -4,7 +4,7 @@
 
 ## Description
 
-A small project I started to better understand and visualize the process of solving Rubik's cube. Play it [here](http://www.quora.com/Adam-DAngelo)
+A small project I started to better understand and visualize the process of solving Rubik's cube. Play it [here](https://deyama.itch.io/rubik)
 
 ## Controls
 
