@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public enum RotationType { Face, Cube }
 
 public class Cube : MonoBehaviour
 {
-	public GameObject cubiePrefab;
+    [SerializeField] private GameObject cubiePrefab;
 
 	[Range(0.3f, 2f)]
-	public float duration = 0.5f;
+    [SerializeField] private float duration = 0.5f;
 
 	private Transform[][][] cubeMatrix = new Transform[3][][];
 	private Transform[] selected;
 	private bool coroutineRunning;
-
-	//public bool relativeToCamera;
 
 	private MoveHistory moveHistory;
 
@@ -112,18 +106,6 @@ public class Cube : MonoBehaviour
 
 		return cubies;
 	}
-
-
-	//	void Update()
-	//	{
-	//		Vector3 x = GetCameraAlignedVector(transform.right);
-	//		Vector3 y = GetCameraAlignedVector(transform.up);
-	//		Vector3 z = GetCameraAlignedVector(-transform.forward);
-	//
-	//		Debug.DrawRay(transform.position, z * 3, Color.blue);
-	//		Debug.DrawRay(transform.position, x * 3, Color.red);
-	//		Debug.DrawRay(transform.position, y * 3, Color.green);
-	//	}
 
 
 	Vector3 GetCameraAlignedVector(Vector3 vector)
@@ -309,7 +291,6 @@ public class Cube : MonoBehaviour
 	}
 
 
-	// TODO Cache camera position and use it throughout the sequence
 	IEnumerator DoSequenceCoroutine(Moves[] moveSequence, bool relativeToCamera)
 	{
 		Quaternion camRot = GetCameraRotation();

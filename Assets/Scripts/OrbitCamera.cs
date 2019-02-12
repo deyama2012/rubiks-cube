@@ -1,28 +1,26 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class OrbitCamera : MonoBehaviour
 {
     [Header("Zoom")]
-    public float zoom = 45;
-    public float minZoom = 30;
-    public float maxZoom = 60;
-    public float zoomSpeed = 5000;
+    [SerializeField] private float zoom = 45;
+    [SerializeField] private float minZoom = 30;
+    [SerializeField] private float maxZoom = 60;
+    [SerializeField] private float zoomSpeed = 5000;
 
     [Header("Rotation")]
-    public float xSpeed = 500;
-    public float ySpeed = 500;
+    [SerializeField] private float xSpeed = 500;
+    [SerializeField] private float ySpeed = 500;
 
-    float x, y;
-    Camera mainCam;
+    private float x, y;
+    private Camera mainCam;
 
-    Vector3 defaultPos;
-    Quaternion defaultRot;
+    private Vector3 defaultPos;
+    private Quaternion defaultRot;
 
     [Header("Turn table")]
-    public bool turnTable;
-    public float turnSpeed = 100;
+    [SerializeField] private bool turnTable;
+    [SerializeField] private float turnSpeed = 100;
 
     /// /////////////////////////////////////////////////////////
 

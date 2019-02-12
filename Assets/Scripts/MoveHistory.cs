@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum Moves { F = 0, Fi, B, Bi, L, Li, R, Ri, U, Ui, D, Di, X, Xi, Y, Yi, Z, Zi }
+
 
 public class MoveHistory : MonoBehaviour
 {
@@ -13,9 +12,11 @@ public class MoveHistory : MonoBehaviour
 	private List<Moves> listMoveNames = new List<Moves>();
 	private List<MoveInfo> listMoveInfo = new List<MoveInfo>();
 
-	public Text textLog;
+    [SerializeField]
+    private Text textLog;
 
-	public bool stopLogging;
+    [SerializeField]
+    private bool stopLogging;
 
 	/// ////////////////////////////////////////////////////////////
 

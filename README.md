@@ -17,6 +17,9 @@ A small project I started to better understand and visualize the process of solv
 
 ### Keyboard input
 
+- _F_, _B_, _R_, _L_, _U_, _D_ - Rotate respective faces of the cube
+- _X_, _Y_, _Z_ - Rotate cube
+- Hold _Left Shift_ to invert direction of the rotation
 - _Ctrl+Z_ - Undo last move
 
 ### Onscreen controls

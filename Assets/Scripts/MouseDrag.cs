@@ -1,21 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class MouseDrag : MonoBehaviour
 {
-	public LayerMask layerMask;
-	public Cube rubik;
-	public bool relativeToCamera = false;
+	[SerializeField] private LayerMask layerMask;
+    [SerializeField] private Cube rubik;
+    [SerializeField] private bool relativeToCamera = false;
 
-	Vector3 start, normal;
-	List<Transform> list = new List<Transform>();
-	const float cubieHalfSize = 0.5f;
-	enum Axes { X, Y, Z }
+    private Vector3 start, normal;
+    private List<Transform> list = new List<Transform>();
+    private const float cubieHalfSize = 0.5f;
+    private enum Axes { X, Y, Z }
 
 	void Update()
 	{

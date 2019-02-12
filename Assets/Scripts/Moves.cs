@@ -1,0 +1,1 @@
+﻿public enum Moves { F = 0, Fi, B, Bi, L, Li, R, Ri, U, Ui, D, Di, X, Xi, Y, Yi, Z, Zi }
