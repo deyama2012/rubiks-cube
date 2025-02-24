@@ -1,6 +1,6 @@
 # Rubik's Cube
 
-![Example](https://i.imgur.com/8NFzDie.gif)
+![Example](https://imgur.com/a/pBtl9xb)
 
 ## Description
 
