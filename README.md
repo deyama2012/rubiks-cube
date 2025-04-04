@@ -31,7 +31,7 @@ A small project I started to better understand and visualize the process of solv
 - Use '_Undo all_' to revert all moves according to the move history
 - Use '_Clear history_' to clear move history
 - Use '_Scramble_' to randomize the cube
-- Use '_Seq_' buttons to permorm predefined sequences of moves, required to solve the cube 
+- Use '_Seq_' buttons to perform predefined sequences of moves, required to solve the cube 
 
 ## Features
 
