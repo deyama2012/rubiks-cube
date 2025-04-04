@@ -35,7 +35,7 @@ A small project I started to better understand and visualize the process of solv
 
 ## Features
 
-- Rotations with onscreen controls are relative to the camera. Rotations with mouse aren't
+- All rotations performed through onscreen controls or a keyboard are relative to the camera. However they get written to the move history in accordance with cube's initial orientation
 - Scramble functionality
 - History of moves with '_Undo_', '_Undo all_' and '_Clear history_' functionality
 - Predefined sequences of moves
